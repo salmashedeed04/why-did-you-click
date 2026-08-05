@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Why Did You Click? — A Media Literacy Experience</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0E0F12;
+    --surface: #17181D;
+    --surface-2: #1F2127;
+    --text: #EDEDEF;
+    --muted: #8B8D98;
+    --alert: #FF6B4A;
+    --alert-dim: #4a2c22;
+    --calm: #4DD0C4;
+    --calm-dim: #1d3634;
+    --gold: #E8B84B;
+    --line: #2A2C33;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding: 32px 16px 60px;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001s !important; transition-duration:0.001s !important;}
+  }
+
+  /* ---------- Outer chrome ---------- */
+  .brand{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:20px;
+    text-align:center;
+  }
+  .brand span{color:var(--calm);}
+
+  /* ---------- Phone frame (signature element) ---------- */
+  .device{
+    width: 380px;
+    max-width:92vw;
+    background: linear-gradient(180deg, #1c1d22, #101115);
+    border-radius: 40px;
+    padding: 14px;
+    box-shadow: 0 40px 80px -30px rgba(0,0,0,0.7), 0 0 0 1px #2a2c33;
+    position:relative;
+  }
+  .notch{
+    position:absolute;
+    top:14px; left:50%; transform:translateX(-50%);
+    width:110px; height:20px;
+    background:#0b0c0e;
+    border-radius:12px;
+    z-index:5;
+  }
+  .screen{
+    background: var(--surface);
+    border-radius: 28px;
+    overflow:hidden;
+    min-height: 640px;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+  .attention-bar-track{
+    height:4px;
+    background: var(--line);
+    margin: 14px 16px 0;
+    border-radius:4px;
+    overflow:hidden;
+    flex-shrink:0;
+  }
+  .attention-bar-fill{
+    height:100%;
+    width:100%;
+    background: linear-gradient(90deg, var(--calm), var(--alert));
+    transform-origin:left;
+    transition: transform 0.15s linear;
+  }
+  .status{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding: 10px 16px 4px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:10px;
+    color:var(--muted);
+    letter-spacing:0.05em;
+    flex-shrink:0;
+  }
+  .status .dot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--alert);
+    display:inline-block;
+    margin-right:6px;
+    animation: pulse 1.4s infinite;
+  }
+  @keyframes pulse{
+    0%,100%{opacity:1;} 50%{opacity:0.3;}
+  }
+  .stage{
+    flex:1;
+    padding: 16px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    overflow-y:auto;
+  }
+
+  /* ---------- Typography ---------- */
+  h1,h2,h3{
+    font-family:'Archivo Black', sans-serif;
+    line-height:1.05;
+    margin:0;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--calm);
+    margin:0 0 6px;
+  }
+  p{ margin:0; line-height:1.5; color:var(--text); }
+  .muted{ color:var(--muted); font-size:13px; }
+
+  /* ---------- Feed card (level 1 & 2) ---------- */
+  .feed-card{
+    background: var(--surface-2);
+    border-radius:16px;
+    border:1px solid var(--line);
+    overflow:hidden;
+  }
+  .feed-media{
+    height:180px;
+    background:
+      radial-gradient(120% 100% at 20% 10%, rgba(255,107,74,0.35), transparent 60%),
+      radial-gradient(120% 100% at 80% 90%, rgba(77,208,196,0.25), transparent 60%),
+      #0b0c0e;
+    display:flex;
+    align-items:flex-end;
+    padding:14px;
+    position:relative;
+  }
+  .feed-tag{
+    background:var(--alert);
+    color:#1a0e08;
+    font-family:'JetBrains Mono', monospace;
+    font-weight:600;
+    font-size:10px;
+    padding:3px 8px;
+    border-radius:6px;
+    position:absolute;
+    top:12px; left:12px;
+    letter-spacing:0.05em;
+  }
+  .feed-headline{
+    font-family:'Archivo Black', sans-serif;
+    font-size:20px;
+    color:#fff;
+    text-shadow:0 2px 12px rgba(0,0,0,0.6);
+  }
+  .feed-meta{
+    display:flex;
+    justify-content:space-between;
+    padding:10px 14px;
+    font-size:12px;
+    color:var(--muted);
+    border-top:1px solid var(--line);
+  }
+
+  /* ---------- Choice buttons ---------- */
+  .choices{ display:flex; flex-direction:column; gap:8px; }
+  button.choice{
+    all:unset;
+    cursor:pointer;
+    background: var(--surface-2);
+    border:1px solid var(--line);
+    color:var(--text);
+    padding:12px 14px;
+    border-radius:12px;
+    font-size:14px;
+    font-weight:500;
+    transition: border-color .15s, transform .1s, background .15s;
+  }
+  button.choice:hover{ border-color:var(--calm); background:#1c2b2a; }
+  button.choice:active{ transform: scale(0.98); }
+  button.choice:focus-visible{ outline:2px solid var(--calm); outline-offset:2px; }
+  button.choice.alert-choice:hover{ border-color:var(--alert); background:#2a1c17; }
+
+  .primary-btn{
+    all:unset;
+    cursor:pointer;
+    background: var(--calm);
+    color:#08201d;
+    font-weight:700;
+    font-size:14px;
+    padding:13px 18px;
+    border-radius:12px;
+    text-align:center;
+    transition: filter .15s, transform .1s;
+  }
+  .primary-btn:hover{ filter:brightness(1.08); }
+  .primary-btn:active{ transform: scale(0.98); }
+  .primary-btn:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+
+  .ghost-btn{
+    all:unset;
+    cursor:pointer;
+    text-align:center;
+    color:var(--muted);
+    font-size:12px;
+    padding:8px;
+    text-decoration:underline;
+    text-underline-offset:3px;
+  }
+  .ghost-btn:hover{ color:var(--text); }
+
+  /* ---------- Reveal / feedback panel ---------- */
+  .reveal{
+    background: var(--calm-dim);
+    border:1px solid #2b544e;
+    border-radius:12px;
+    padding:12px 14px;
+    font-size:13px;
+    animation: fadeIn .3s ease;
+  }
+  .reveal.warn{
+    background: var(--alert-dim);
+    border:1px solid #5c3a2c;
+  }
+  .reveal strong{ display:block; margin-bottom:4px; font-size:12px; letter-spacing:.03em; text-transform:uppercase; font-family:'JetBrains Mono',monospace; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
+
+  /* ---------- Split screen (level 3) ---------- */
+  .split{
+    display:grid;
+    grid-template-rows:1fr 1fr;
+    gap:2px;
+    border-radius:14px;
+    overflow:hidden;
+    height:220px;
+    border:1px solid var(--line);
+  }
+  .split-half{
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    text-align:center;
+    padding:10px;
+    color:#fff;
+  }
+  .split-half.top{ background: linear-gradient(135deg,#1a2e2b,#0e1a18); }
+  .split-half.bottom{ background: linear-gradient(135deg,#2e1a17,#1a100e); }
+
+  /* ---------- Source cards (level 2) ---------- */
+  .source-grid{ display:flex; flex-direction:column; gap:8px; }
+  .source-card{
+    all:unset; cursor:pointer;
+    display:flex; flex-direction:column; gap:2px;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px 14px;
+  }
+  .source-card:hover{ border-color:var(--calm); }
+  .source-card .label{ font-family:'JetBrains Mono', monospace; font-size:10px; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; }
+  .source-card .headline{ font-weight:600; font-size:14px; }
+
+  /* ---------- Deepfake grid (level 5) ---------- */
+  .df-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  .df-card{
+    all:unset; cursor:pointer;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:10px 6px;
+    text-align:center;
+    font-size:12px;
+    display:flex; flex-direction:column; gap:6px; align-items:center;
+  }
+  .df-card:hover{ border-color:var(--calm); }
+  .df-thumb{ width:100%; height:60px; border-radius:8px; background:#0b0c0e; overflow:hidden; }
+
+  /* ---------- Video placeholders (swap in real files, no code changes needed) ---------- */
+  /* Any <video> tag with class="media-slot" sits ON TOP of the existing gradient/art.
+     If the file in data-src is missing, the video stays invisible and the gradient
+     underneath shows through automatically — nothing breaks, nothing looks empty. */
+  .media-slot{
+    position:absolute;
+    inset:0;
+    width:100%; height:100%;
+    object-fit:cover;
+    opacity:0;
+    transition:opacity .2s ease;
+  }
+  .media-slot.loaded{ opacity:1; }
+  .feed-media{ position:relative; }
+  .split-half{ position:relative; overflow:hidden; }
+  .split-half span.caption{ position:relative; z-index:1; background:rgba(0,0,0,0.45); padding:4px 8px; border-radius:6px; }
+  .df-thumb{ position:relative; }
+
+  /* ---------- Progress dots ---------- */
+  .progress{
+    display:flex; gap:6px; justify-content:center; margin-top:14px; flex-shrink:0; padding-bottom:16px;
+  }
+  .progress .pip{ width:6px; height:6px; border-radius:50%; background:var(--line); }
+  .progress .pip.done{ background:var(--calm); }
+  .progress .pip.now{ background:var(--alert); }
+
+  /* ---------- Stats screen ---------- */
+  .stat-row{
+    display:flex; justify-content:space-between; align-items:baseline;
+    border-bottom:1px solid var(--line);
+    padding:10px 0;
+  }
+  .stat-row .num{ font-family:'JetBrains Mono', monospace; font-size:22px; color:var(--gold); }
+  .stat-row .lbl{ font-size:12px; color:var(--muted); }
+
+  .badge{
+    display:flex; align-items:center; gap:10px;
+    background: linear-gradient(135deg, #3a2e12, #1a1508);
+    border:1px solid #5c4a1e;
+    border-radius:14px;
+    padding:14px;
+  }
+  .badge .medal{ font-size:28px; }
+  .badge .title{ font-family:'Archivo Black', sans-serif; font-size:14px; color:var(--gold); }
+  .badge .sub{ font-size:11px; color:var(--muted); }
+
+  footer{
+    margin-top:22px;
+    text-align:center;
+    color:var(--muted);
+    font-size:11px;
+    font-family:'JetBrains Mono', monospace;
+    max-width:380px;
+  }
+  a.link{ color:var(--calm); }
+</style>
+</head>
+<body>
+
+<div class="brand">Why Did You Click? <span>· a UNESCO MIL youth experience</span></div>
+
+<div class="device">
+  <div class="notch"></div>
+  <div class="screen">
+    <div class="attention-bar-track"><div class="attention-bar-fill" id="attentionFill"></div></div>
+    <div class="status"><span><span class="dot"></span>LIVE FEED</span><span id="clockLabel">for you</span></div>
+    <div class="stage" id="stage"></div>
+    <div class="progress" id="progress"></div>
+  </div>
+</div>
+
+<footer>
+  Built for youth organizations acting as Media &amp; Information Literacy change agents.<br>
+  No real people, cases, or news events are depicted — every scenario here is fictional.
+</footer>
+
+<script>
+/* ======================= STATE ======================= */
+const state = {
+  step: 0,
+  totalSteps: 7, // intro, L1, L2, L3, L4, L5, results
+  clicksOnClickbait: 0,
+  clickbaitOffered: 0,
+  fellForFake: 0,
+  verifiedCount: 0,
+  spotChecks: 0,
+  reactionLog: []
+};
+
+const stageEl = document.getElementById('stage');
+const progressEl = document.getElementById('progress');
+const fillEl = document.getElementById('attentionFill');
+
+function renderProgress(){
+  progressEl.innerHTML = '';
+  for(let i=0;i<state.totalSteps;i++){
+    const d = document.createElement('div');
+    d.className = 'pip' + (i < state.step ? ' done' : i === state.step ? ' now' : '');
+    progressEl.appendChild(d);
+  }
+}
+
+let attentionTimer = null;
+function startAttentionCountdown(seconds, onExpire){
+  clearInterval(attentionTimer);
+  fillEl.style.transition = 'none';
+  fillEl.style.transform = 'scaleX(1)';
+  void fillEl.offsetWidth;
+  fillEl.style.transition = `transform ${seconds}s linear`;
+  fillEl.style.transform = 'scaleX(0)';
+  attentionTimer = setTimeout(()=>{ if(onExpire) onExpire(); }, seconds*1000);
+}
+function stopAttentionCountdown(){
+  clearInterval(attentionTimer);
+  fillEl.style.transition = 'transform .2s ease';
+  fillEl.style.transform = 'scaleX(1)';
+}
+
+function go(step){
+  state.step = step;
+  renderProgress();
+  screens[step]();
+}
+
+/* ======================= SCREENS ======================= */
+const screens = [
+  screenIntro,
+  screenLevel1,
+  screenLevel2,
+  screenLevel3,
+  screenLevel4,
+  screenLevel5,
+  screenResults
+];
+
+function screenIntro(){
+  stopAttentionCountdown();
+  stageEl.innerHTML = `
+    <div class="eyebrow">Episode 00 · Before we start</div>
+    <h1 style="font-size:26px;">You scroll.<br>The feed learns.</h1>
+    <p class="muted">This is a short interactive experience about how algorithms, headlines, and trends shape what you pay attention to — not a quiz, and not a lecture.</p>
+    <div class="reveal">
+      <strong>How it works</strong>
+      Every choice you make gets logged. At the end, you'll see your own attention pattern — and unlock your Media Literacy Ambassador badge.
+    </div>
+    <button class="primary-btn" onclick="go(1)">Open the feed →</button>
+  `;
+}
+
+/* ---------- LEVEL 1: the click ---------- */
+function screenLevel1(){
+  stageEl.innerHTML = `
+    <div class="eyebrow">Level 1 · Notice why you click</div>
+    <div class="feed-card">
+      <div class="feed-media">
+        <!-- VIDEO SLOT 1: drop a file at videos/level1.mp4 and it appears automatically -->
+        <video class="media-slot" muted loop autoplay playsinline
+               onloadeddata="this.classList.add('loaded')"
+               onerror="this.style.display='none'">
+          <source src="videos/level1.mp4" type="video/mp4">
+        </video>
+        <div class="feed-tag">TRENDING</div>
+        <div class="feed-headline">"My teacher's secret double life 😱"</div>
+      </div>
+      <div class="feed-meta"><span>@dailybuzzclips</span><span>2.1M views · 3h</span></div>
+    </div>
+    <div class="choices">
+      <button class="choice alert-choice" onclick="l1choice(true)">▶ Watch the video</button>
+      <button class="choice" onclick="l1choice(false)">Skip and keep scrolling</button>
+    </div>
+    <div id="l1-follow"></div>
+  `;
+  startAttentionCountdown(6, ()=>{ /* natural expiry, no penalty */ });
+}
+function l1choice(watched){
+  stopAttentionCountdown();
+  state.clickbaitOffered++;
+  if(watched) state.clicksOnClickbait++;
+  const follow = document.getElementById('l1-follow');
+  follow.innerHTML = `
+    <div class="reveal" style="margin-top:12px;">
+      <strong>Quick check-in</strong>
+      ${watched ? "You clicked. What actually made you click?" : "You skipped. What made that easier this time?"}
+    </div>
+    <div class="choices" style="margin-top:8px;">
+      <button class="choice" onclick="l1reason('trending')">It was trending / lots of views</button>
+      <button class="choice" onclick="l1reason('truth')">I wanted to know if it was true</button>
+      <button class="choice" onclick="l1reason('shock')">The headline shocked me</button>
+      <button class="choice" onclick="l1reason('comments')">Everyone was commenting on it</button>
+    </div>
+  `;
+}
+function l1reason(reason){
+  state.reactionLog.push(reason);
+  stageEl.insertAdjacentHTML('beforeend', `
+    <div class="reveal">
+      <strong>What's happening</strong>
+      That reaction is exactly what a "trending" label, a shocking headline, or a wall of comments are designed to trigger — engagement, not accuracy. Neither reaction is wrong. Noticing it is the actual skill.
+    </div>
+    <button class="primary-btn" onclick="go(2)">Continue →</button>
+  `);
+}
+
+/* ---------- LEVEL 2: compare sources ---------- */
+function screenLevel2(){
+  stageEl.innerHTML = `
+    <div class="eyebrow">Level 2 · Same story, four versions</div>
+    <p>The same "secret double life" story is spreading. Which version would you trust first?</p>
+    <div class="source-grid">
+      <button class="source-card" onclick="l2choice('breaking')">
+        <span class="label">Anonymous repost</span>
+        <span class="headline">🚨 BREAKING: you won't believe this</span>
+      </button>
+      <button class="source-card" onclick="l2choice('truth')">
+        <span class="label">Influencer account</span>
+        <span class="headline">"The truth nobody is telling you"</span>
+      </button>
+      <button class="source-card" onclick="l2choice('official')">
+        <span class="label">School district statement</span>
+        <span class="headline">Official update on a personnel matter</span>
+      </button>
+      <button class="source-card" onclick="l2choice('rando')">
+        <span class="label">Unverified account, 12 followers</span>
+        <span class="headline">"I heard from a friend that..."</span>
+      </button>
+    </div>
+    <div id="l2-follow"></div>
+  `;
+}
+function l2choice(pick){
+  if(pick === 'official') state.verifiedCount++;
+  const explanations = {
+    breaking: "Caps-lock urgency (\"BREAKING\") is a style, not a credential. Anyone can use it, verified or not.",
+    truth: "\"The truth nobody is telling you\" flatters the viewer for watching — that's a persuasion technique, not a source citation.",
+    official: "An official statement from the institution involved is the closest thing here to a named, checkable source. That's the strongest pick.",
+    rando: "A secondhand account from an anonymous, unverified profile has the least accountability of the four."
+  };
+  document.getElementById('l2-follow').innerHTML = `
+    <div class="reveal ${pick==='official' ? '' : 'warn'}">
+      <strong>${pick==='official' ? 'Good instinct' : 'Worth a second look'}</strong>
+      ${explanations[pick]}
+    </div>
+    <button class="primary-btn" onclick="go(3)">Continue →</button>
+  `;
+}
+
+/* ---------- LEVEL 3: split screen attention test ---------- */
+function screenLevel3(){
+  stageEl.innerHTML = `
+    <div class="eyebrow">Level 3 · Split-screen test</div>
+    <p>Watch both halves for a moment.</p>
+    <div class="split">
+      <div class="split-half top">
+        <!-- VIDEO SLOT 2: drop a file at videos/level3-top.mp4 -->
+        <video class="media-slot" muted loop autoplay playsinline
+               onloadeddata="this.classList.add('loaded')"
+               onerror="this.style.display='none'">
+          <source src="videos/level3-top.mp4" type="video/mp4">
+        </video>
+        <span class="caption">🎮 gameplay footage — blocks stacking, no sound</span>
+      </div>
+      <div class="split-half bottom">
+        <!-- VIDEO SLOT 3: drop a file at videos/level3-bottom.mp4 -->
+        <video class="media-slot" muted loop autoplay playsinline
+               onloadeddata="this.classList.add('loaded')"
+               onerror="this.style.display='none'">
+          <source src="videos/level3-bottom.mp4" type="video/mp4">
+        </video>
+        <span class="caption">🎙 "...and that's when investigators found the second note, left folded inside—"</span>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:6px;">A number appeared briefly on the gameplay half. What was it?</p>
+    <div class="choices">
+      <button class="choice" onclick="l3choice(true)">42</button>
+      <button class="choice" onclick="l3choice(false)">17</button>
+      <button class="choice" onclick="l3choice(false)">I didn't actually see a number</button>
+    </div>
+    <div id="l3-follow"></div>
+  `;
+}
+function l3choice(){
+  state.spotChecks++;
+  document.getElementById('l3-follow').innerHTML = `
+    <div class="reveal warn">
+      <strong>There was no number</strong>
+      That question was the point, not a memory test. Split-screen "gameplay + story" videos are built to hold your eyes on one half while a narrated story plays on the other — you absorb less of both, but you watch longer. That extra watch time is the actual product.
+    </div>
+    <button class="primary-btn" onclick="go(4)">Continue →</button>
+  `;
+}
+
+/* ---------- LEVEL 4: rumor spreads ---------- */
+function screenLevel4(){
+  stageEl.innerHTML = `
+    <div class="eyebrow">Level 4 · A rumor lands in your group chat</div>
+    <div class="feed-card">
+      <div style="padding:14px;">
+        <p style="font-weight:600;">"apparently the trip next month got cancelled bc someone got hurt on the last one 👀 pass it on"</p>
+        <p class="muted" style="margin-top:6px;">No name, no link, no date.</p>
+      </div>
+    </div>
+    <div class="choices">
+      <button class="choice alert-choice" onclick="l4choice('forward')">Forward it to the group</button>
+      <button class="choice" onclick="l4choice('factcheck')">Ask the trip organizer directly</button>
+      <button class="choice" onclick="l4choice('ignore')">Ignore it and move on</button>
+      <button class="choice" onclick="l4choice('source')">Reply asking "where did this come from?"</button>
+    </div>
+    <div id="l4-follow"></div>
+  `;
+}
+function l4choice(pick){
+  if(pick === 'factcheck' || pick === 'source') state.verifiedCount++;
+  const outcomes = {
+    forward: { tone:'warn', title:'It spreads', text:"By the time it reaches the last person, three new details have been added that nobody can trace. This is how a rumor becomes 'fact' — repetition, not evidence." },
+    factcheck: { tone:'', title:'Confirmed, calmly', text:"The organizer tells you the trip is unchanged. One message ended it — but only because someone asked the source directly instead of the chat." },
+    ignore: { tone:'', title:'It doesn't spread through you', text:"Ignoring isn't the same as correcting it, but it does stop it at you. Some rumors just need one less person passing them on." },
+    source: { tone:'', title:'Good reflex', text:"Asking \"where did this come from\" in public makes the claim's weak foundation visible to everyone else in the chat too." }
+  };
+  const o = outcomes[pick];
+  document.getElementById('l4-follow').innerHTML = `
+    <div class="reveal ${o.tone}">
+      <strong>${o.title}</strong>
+      ${o.text}
+    </div>
+    <button class="primary-btn" onclick="go(5)">Continue →</button>
+  `;
+}
+
+/* ---------- LEVEL 5: deepfake spotting ---------- */
+function screenLevel5(){
+  stageEl.innerHTML = `
+    <div class="eyebrow">Level 5 · One of these is AI-generated</div>
+    <p>Same creator, three clips posted this week. Which one is fully AI-generated?</p>
+    <div class="df-grid">
+      <button class="df-card" onclick="l5choice(false)">
+        <div class="df-thumb">
+          <!-- VIDEO SLOT 4: videos/level5-a.mp4 -->
+          <video class="media-slot" muted loop autoplay playsinline onloadeddata="this.classList.add('loaded')" onerror="this.style.display='none'"><source src="videos/level5-a.mp4" type="video/mp4"></video>
+        </div>Clip A<br><span class="muted">"morning routine"</span></button>
+      <button class="df-card" onclick="l5choice(true)">
+        <div class="df-thumb">
+          <!-- VIDEO SLOT 5: videos/level5-b.mp4 -->
+          <video class="media-slot" muted loop autoplay playsinline onloadeddata="this.classList.add('loaded')" onerror="this.style.display='none'"><source src="videos/level5-b.mp4" type="video/mp4"></video>
+        </div>Clip B<br><span class="muted">"reacting to news"</span></button>
+      <button class="df-card" onclick="l5choice(false)">
+        <div class="df-thumb">
+          <!-- VIDEO SLOT 6: videos/level5-c.mp4 -->
+          <video class="media-slot" muted loop autoplay playsinline onloadeddata="this.classList.add('loaded')" onerror="this.style.display='none'"><source src="videos/level5-c.mp4" type="video/mp4"></video>
+        </div>Clip C<br><span class="muted">"studying with me"</span></button>
+    </div>
+    <div id="l5-follow"></div>
+  `;
+}
+function l5choice(correct){
+  if(correct) state.fellForFake += 0; else state.fellForFake += 1;
+  document.getElementById('l5-follow').innerHTML = `
+    <div class="reveal ${correct ? '' : 'warn'}">
+      <strong>${correct ? "That was the one" : "Actually, Clip B was the fake"}</strong>
+      Reaction clips are the easiest to fake convincingly — a face, a voice, and a strong emotion is all current tools need. Mundane, low-stakes clips (routines, studying) are harder to fake believably because small physical details are more likely to slip.
+      <br><br>The real safeguard isn't spotting every fake by eye — it's checking who posted it, whether it appears anywhere else, and slowing down before reacting.
+    </div>
+    <button class="primary-btn" onclick="go(6)">See your results →</button>
+  `;
+}
+
+/* ---------- RESULTS ---------- */
+function screenResults(){
+  stopAttentionCountdown();
+  const clickRate = state.clickbaitOffered ? Math.round((state.clicksOnClickbait/state.clickbaitOffered)*100) : 0;
+  const verified = state.verifiedCount;
+  stageEl.innerHTML = `
+    <div class="eyebrow">Debrief</div>
+    <h2 style="font-size:22px;">Your attention pattern</h2>
+    <div class="stat-row"><span class="lbl">Clicked on clickbait framing</span><span class="num">${clickRate}%</span></div>
+    <div class="stat-row"><span class="lbl">Chose a verifiable / official source</span><span class="num">${verified}/2</span></div>
+    <div class="stat-row"><span class="lbl">Levels completed</span><span class="num">5/5</span></div>
+    <div class="reveal" style="margin-top:4px;">
+      <strong>The point</strong>
+      You are not bad at this. You are human, and algorithms are built by people who study exactly what pulls human attention. Media literacy isn't refusing to feel curious, shocked, or entertained — it's noticing the pull, and choosing what to do with it anyway.
+    </div>
+    <div class="badge">
+      <div class="medal">🏆</div>
+      <div>
+        <div class="title">MIL Ambassador Badge Unlocked</div>
+        <div class="sub">Why Did You Click? · completed</div>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:2px;">Now put it to use — an ambassador doesn't just notice the pull, they help others notice it too.</p>
+    <div class="choices">
+      <button class="choice" onclick="shareResult()">🔗 Invite a friend to play</button>
+      <button class="choice" onclick="alert('In the full version, this opens a one-page workshop guide your youth organization can run in 20 minutes — five levels, five discussion prompts.')">📋 Host a 20-minute workshop</button>
+      <button class="choice" onclick="alert('In the full version, this generates a printable classroom challenge sheet so you can run this as a group activity.')">🎯 Challenge your classmates</button>
+      <button class="choice" onclick="alert('In the full version, completing the workshop with your group unlocks a downloadable MIL Ambassador certificate.')">📜 Earn your certificate</button>
+      <button class="choice" onclick="alert('In the full version, this links out to UNESCO-affiliated youth organizations near you.')">🌍 Join a local youth organization</button>
+    </div>
+    <button class="ghost-btn" onclick="restart()">Play again from the start</button>
+  `;
+}
+function shareResult(){
+  const text = `I just found out I click on trending headlines ${state.clickbaitOffered? Math.round((state.clicksOnClickbait/state.clickbaitOffered)*100):0}% of the time. Try "Why Did You Click?" and see your own pattern.`;
+  if(navigator.share){ navigator.share({ text }); }
+  else{ prompt('Copy this to share:', text); }
+}
+function restart(){
+  state.step = 0;
+  state.clicksOnClickbait = 0;
+  state.clickbaitOffered = 0;
+  state.fellForFake = 0;
+  state.verifiedCount = 0;
+  state.spotChecks = 0;
+  state.reactionLog = [];
+  go(0);
+}
+
+/* ======================= INIT ======================= */
+go(0);
+</script>
+</body>
+</html>
